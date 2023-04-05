@@ -6,11 +6,6 @@ const AppError = require("./misc/AppError");
 const commonErrors = require("./misc/commonErrors");
 const apiRouter = require("./router");
 
-<<<<<<< HEAD
-async function create() {
-  // MongoDB에 연결
-  await loader.connectMongoDB();
-=======
 /// ---필요한 라우터 require ---
 const loginRouter = require("./routers/login");
 // const accountRouter = require("./routers/account");
@@ -22,7 +17,6 @@ const graphRouter = require("./routers/graph");
 const postRouter = require("./routers/post");
 // const districtsRouter = require("./routers/districts");
 /// -------------------------------
->>>>>>> jinyoung
 
   console.log("express application을 초기화합니다.");
   const expressApp = express();
@@ -36,10 +30,6 @@ const postRouter = require("./routers/post");
     });
   });
 
-<<<<<<< HEAD
-  // version 1의 api router를 등록
-  expressApp.use("/api/v1", apiRouter.v1);
-=======
 // ------ 라우터 등록 ------
 app.use("/graph", graphRouter);
 // app.use("/account", accountRouter);
@@ -51,7 +41,6 @@ app.use("/modify", modifyRouter);
 app.use("/post", postRouter);
 // app.use("/districts", districtsRouter);
 //--------------------------
->>>>>>> jinyoung
 
   // 해당되는 URL이 없을 때를 대비한 미들웨어
   expressApp.use((req, res, next) => {
@@ -108,6 +97,5 @@ app.use("/post", postRouter);
   };
 
   return app;
-}
 
 module.exports = create;
