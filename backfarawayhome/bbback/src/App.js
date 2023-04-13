@@ -1,10 +1,10 @@
-const http = require("http");
+require("dotenv").config();
+
 const express = require("express");
-const loader = require("./loader");
-const config = require("./config");
-const AppError = require("./misc/AppError");
-const commonErrors = require("./misc/commonErrors");
-const apiRouter = require("./router");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const AppError = require("./utils/AppError");
+const buildResponse = require("./utils/buildResponse");
 
 /// ---필요한 라우터 require ---
 const loginRouter = require("./routers/login");
@@ -14,21 +14,32 @@ const withdrawRouter = require("./routers/withdraw");
 const modifyRouter = require("./routers/modify");
 const userRouter = require("./routers/user");
 const graphRouter = require("./routers/graph");
-const postRouter = require("./routers/post");
 // const districtsRouter = require("./routers/districts");
 /// -------------------------------
 
-  console.log("express application을 초기화합니다.");
-  const expressApp = express();
+///----몽고DB 연결 ---------
+mongoose.set("strictQuery", false);
+mongoose.connect(process.env.MONGODB_URL);
+mongoose.connection.on("connected", () => {
+  console.log("정상적으로 DB와 연결되었습니다.   MongoDB Connected");
+  console.log("--------------------------------------------");
+});
+mongoose.connection.on('error', (error) => {
+  console.error('mongoDB connection error: ', error);
+});
+mongoose.connection.on('disconnected', () => {
+  console.error('lost connection to mongoDB. trying to reconnect');
+  mongoose.connect(process.env.MONGODB_URL); // 연결 재시도.
+});
 
-  expressApp.use(express.json());
+///------------------------
+const app = express();
 
-  // Health check API
-  expressApp.get("/health", (req, res, next) => {
-    res.json({
-      status: "OK",
-    });
-  });
+// ------ 미들웨어 등록 ------
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+//------------------------
 
 // ------ 라우터 등록 ------
 app.use("/graph", graphRouter);
@@ -38,64 +49,21 @@ app.use("/register", registerRouter);
 app.use("/withdraw", withdrawRouter);
 app.use("/user", userRouter);
 app.use("/modify", modifyRouter);
-app.use("/post", postRouter);
 // app.use("/districts", districtsRouter);
 //--------------------------
 
-  // 해당되는 URL이 없을 때를 대비한 미들웨어
-  expressApp.use((req, res, next) => {
-    next(
-      new AppError(
-        commonErrors.resourceNotFoundError,
-        404,
-        "Resource not found"
-      )
-    );
-  });
-
-  // 에러 핸들러 등록
-  expressApp.use((error, req, res, next) => {
-    console.log(error);
-    res.statusCode = error.httpCode ?? 500;
-    res.json({
-      data: null,
-      error: error.message,
-    });
-  });
-  console.log("express application 준비가 완료되었습니다.");
-
-  // express와 http.Server을 분리해서 관리하기 위함.
-  const server = http.createServer(expressApp);
-
-  const app = {
-    start() {
-      server.listen(config.port);
-      server.on("listening", () => {
-        console.log(`🚀 게시판 서버가 포트 ${config.port}에서 운영중입니다.`);
-      });
-    },
-    stop() {
-      console.log("🔥 서버를 중지 작업을 시작합니다.");
-      this.isShuttingDown = true;
-      return new Promise((resolve, reject) => {
-        server.close(async (error) => {
-          if (error !== undefined) {
-            console.log(`- HTTP 서버 중지를 실패하였습니다: ${error.message}`);
-            reject(error);
-          }
-          console.log("- 들어오는 커넥션을 더 이상 받지 않도록 하였습니다.");
-          await loader.disconnectMongoDB();
-          console.log("- DB 커넥션을 정상적으로 끊었습니다.");
-          console.log("🟢 서버 중지 작업을 성공적으로 마쳤습니다.");
-          this.isShuttingDown = false;
-          resolve();
-        });
-      });
-    },
-    isShuttingDown: false,
-    _app: expressApp,
-  };
-
-  return app;
-
-module.exports = create;
+// ------ 오류처리 미들웨어 ------
+// ! 페이지를 따로 설정하지 않은 것들은 전부 404 에러가 표시되도록 함.
+app.use((_, __, next) => {
+  next(new AppError("resourceNotFoundError", "Resource not found", 404));
+}); 
+app.use((err, req, res, next) => {
+  res.json(buildResponse(null, err.statusCode, err));
+});
+//------------------------
+///------서버 생성------------
+app.listen(process.env.PORT, () =>
+  console.log(`정상적으로 서버를 시작하였습니다. http://localhost:${process.env.PORT}`)
+);
+///--------------------------
+module.exports = app;

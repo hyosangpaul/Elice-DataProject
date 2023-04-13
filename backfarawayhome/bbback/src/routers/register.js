@@ -34,8 +34,7 @@ router.post("/", async (req, res, next) => {
           name: name,
           email: email,
           password: hashedPassword,
-          phoneNumber: phoneNumber,
-          address: address,
+          phoneNumber: phoneNumber
         });
 
         console.log(
