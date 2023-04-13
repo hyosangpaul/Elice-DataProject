@@ -35,16 +35,6 @@ const RegisterForm = () => {
     }));
   };
 
-  // 지역구 이름 가져오기
-  useEffect(() => {
-    async function getDistricts(){
-      const data = await districtsApi.getData();
-      setDistricts(data);
-    }
-    getDistricts();
-  }, []);
-  
-  // ~
   // 1단계 : 유효성 검사(형식 체크)
   const validateInputEmail = (inputEmail) => {
     const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/i ; 
@@ -168,19 +158,6 @@ const RegisterForm = () => {
               isInputPhoneNumberValid === true || form.inputPhoneNumber.length == 0 ? <ValidationNoneBox/> : <ValidationBox>핸드폰 번호 형식이 맞지 않습니다.</ValidationBox>
           }
         </ValidationBigBox>
-        <Label htmlFor="selectedDistrict">주소</Label>
-        <Select
-          id="selectedDistrict"
-          name="selectedDistrict"
-          placeholder="거주하는 지역구를 골라주세요."
-          onChange={handleForm}
-          required
-        >
-          <option value="">선택해주세요</option>
-          {districts.map((elem, i) => (
-            <option key={i} >{elem}</option>
-          ))}
-        </Select>
         <Button style={{ marginTop: "40px" }} type="submit">
           회 원 가 입
         </Button>

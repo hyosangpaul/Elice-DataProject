@@ -4,9 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { userApi } from "../../api/api";
 import { Form, H2, Label, Input, Button } from "./LoginForm.styled";
 import {
-  hasAccessToken,
-  setAccessToken,
-  setRefreshToken,
+  hasAccessToken
 } from "../../utils/tokenFunction";
 import Home from "../Home";
 
