@@ -1,12 +1,11 @@
 /*eslint-disable*/
-import React, { useState, useEffect } from "react";
-import { districtsApi, userApi } from "../../api/api";
+import React, { useState } from "react";
+import { userApi } from "../../api/api";
 import {
   Form,
   H2,
   Label,
   Input,
-  Select,
   Button,
   ValidationBigBox, ValidationBox, ValidationNoneBox
 } from "./ReigsterForm.styled";
@@ -22,10 +21,8 @@ const RegisterForm = () => {
     inputPw: "",
     inputConfirmPw: "",
     inputName: "",
-    inputPhoneNumber: "",
-    selectedDistrict: "",
+    inputPhoneNumber: ""
   });
-  const [districts, setDistricts] = useState([])
 
   const handleForm = (e) => {
     const { name, value } = e.target; // input 태그의 name속성(name을 state명이랑 같게 해야) 및 value속성을 뽑음
